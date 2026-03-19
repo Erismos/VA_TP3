@@ -5,3 +5,5 @@ data/validation/
 results/models/
 __pycache__/
 *.json
+*.lock
+*.toml
