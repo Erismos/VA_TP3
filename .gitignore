@@ -1,2 +1,7 @@
 data/raw/
+data/train/
+data/test/
+data/validation/
 results/models/
+__pycache__/
+*.json
