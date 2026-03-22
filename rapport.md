@@ -141,4 +141,75 @@ Cette approche représente un bon compromis entre :
 
 Même avec un dataset réduit et moins d’époques, le modèle atteint des performances satisfaisantes, ce qui valide notre stratégie.
 
+# Entraînement CNN personnalisé
+
+## Configuration expérimentale
+
+En plus du transfer learning, on a aussi entraîné un CNN fait par nous pour cette tâche. L’idée était surtout de :
+- tester une architecture qu’on contrôle complètement
+- voir plus clairement l’impact des choix de conception sur la classification des 75 espèces.
+
+Le modèle est entraîné from scratch, donc sans poids pré-entraînés, ce qui nous permet d’analyser directement ce qu’il apprend sur notre dataset.
+
+## Choix d’architecture
+
+Le réseau suit une structure en 5 blocs:
+- Bloc 1 : 3 -> 64 canaux
+- Bloc 2 : 64 -> 128 canaux
+- Bloc 3 : 128 -> 256 canaux
+- Bloc 4 : 256 -> 512 canaux
+- Bloc 5 : 512 -> 512 canaux
+
+Les quatre premiers blocs contiennent un max pooling. Ça réduit progressivement la taille des images intermédiaires et augmente le champ réceptif. Pour les papillons, ce choix nous paraît pertinent car il permet de capturer à la fois :
+- des détails locaux (textures, motifs d’ailes)
+- des structures plus globales (forme générale, organisation des couleurs)
+
+On utilise des convolutions 3x3 avec padding=1 dans tous les blocs, ce qui donne un bon compromis entre la performance et le temps de calcul.
+
+## Stabilisation de l’apprentissage
+
+Chaque bloc convolutionnel est suivi d’une Batch Normalization et d’une activation ReLU.
+
+Ce choix nous a aidés à :
+- stabiliser les distributions d’activations au cours de l’entraînement
+- accélérer la convergence
+- limiter les problèmes de gradients instables sur un réseau profond
+
+L’utilisation systématique de ReLU garde aussi une architecture simple et plutot efficace en pratique.
+
+## Tête de classification
+
+Après les blocs convolutionnels, le modèle utilise :
+- un Adaptive Average Pooling (sortie 1x1)
+- une couche fully connected 512 -> 1024
+- une couche de sortie 1024 -> 75 classes
+
+L’AdaptiveAvgPool2d permet de résumer l’information spatiale avant la classification, avec une tête de réseau plus compacte qu’un flatten direct.
+
+La couche intermédiaire à 1024 neurones donne assez de capacité pour séparer des espèces qui se ressemblent visuellement.
+
+## Régularisation et généralisation
+
+Deux couches de Dropout (p=0.5) sont appliquées dans la tête de classification.
+
+Ce choix est important dans notre cas car :
+- le nombre de classes est élevé
+- certaines espèces présentent des ressemblances importantes
+- notre modèle from scratch est plus exposé au surapprentissage
+
+## Initialisation des poids
+
+On a utilisé une initialisation classique adaptée au type de couches pour éviter un démarrage instable de l’entraînement.
+En pratique, ça aide le modèle à converger plus proprement dès les premières époques et à obtenir des résultats plus réguliers.
+
+## Justification globale
+
+Au final, ce CNN personnalisé représente un bon compromis entre :
+- capacité de représentation (profondeur et nombre de canaux)
+- robustesse de l’entraînement (BatchNorm, ReLU, initialisation adaptée)
+- généralisation (Dropout)
+- coût de calcul raisonnable (progression structurée des blocs + pooling)
+
+En résumé, l’architecture est assez expressive pour faire de la classification fine de papillons, tout en restant raisonnable à entraîner dans le cadre du TP.
+
 
