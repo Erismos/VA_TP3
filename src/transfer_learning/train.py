@@ -8,7 +8,8 @@ from pathlib import Path
 
 import torchvision.transforms as transforms
 
-from model import get_model
+
+from model import TransferModel, unfreeze_last_layers
 # def get_model(num_classes):
 #     return nn.Sequential(
 #         nn.Flatten(),
@@ -19,7 +20,7 @@ from model import get_model
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-NUM_EPOCHS = 10
+NUM_EPOCHS = 5
 
 def get_dataloaders(batch_size=32):
 
@@ -44,19 +45,29 @@ def get_dataloaders(batch_size=32):
         transform=transform
     )
 
+    num_classes = len(train_dataset.classes)
+
     # pour tester sans le vrai model donc avec peu d'image pour voir le fonctionnement du pipeline -> rajouter .dataset dans le return avant .classes
-    # train_dataset = Subset(train_dataset, range(200))
-    # val_dataset = Subset(val_dataset, range(50))
+    train_dataset = Subset(train_dataset, range(5000))
+    val_dataset = Subset(val_dataset, range(200))
 
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=batch_size)
 
-    return train_loader, val_loader, len(train_dataset.classes) 
+    return train_loader, val_loader, num_classes 
 
 
-def train_model(lr=0.001, optimizer_name="adam", batch_size=32):
+def train_model(lr=0.001, optimizer_name="adam", batch_size=32, fine_tune=False):
     train_loader, val_loader, num_classes = get_dataloaders(batch_size=batch_size)
-    model = get_model(num_classes=num_classes).to(device)
+    model = TransferModel(num_classes=num_classes, freeze_backbone=True)
+
+    #fine-tuning
+    if fine_tune:
+        model = unfreeze_last_layers(model)
+
+    model = model.to(device)
+
+
     if optimizer_name == "adam":
         optimizer = optim.Adam(model.parameters(), lr=lr)
     elif optimizer_name == "sgd":

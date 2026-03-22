@@ -5,11 +5,18 @@ import json
 from train import train_model
 
 CONFIGS = [
-    {"lr": 0.001,  "optimizer": "adam", "batch_size": 32},
-    {"lr": 0.0001, "optimizer": "adam", "batch_size": 32},
-    {"lr": 0.001,  "optimizer": "sgd",  "batch_size": 32},
-    {"lr": 0.001,  "optimizer": "adam", "batch_size": 64},
-    {"lr": 0.01,   "optimizer": "sgd",  "batch_size": 64},
+    {"lr": 0.001, "optimizer": "adam", "batch_size": 32, "fine_tune": False},
+    {"lr": 0.0001, "optimizer": "adam", "batch_size": 32, "fine_tune": False},
+    {"lr": 0.001,  "optimizer": "sgd",  "batch_size": 32, "fine_tune": False},
+    {"lr": 0.001,  "optimizer": "adam", "batch_size": 64, "fine_tune": False},
+    {"lr": 0.01,   "optimizer": "sgd",  "batch_size": 64, "fine_tune": False},
+
+    {"lr": 0.001, "optimizer": "adam", "batch_size": 32, "fine_tune": True},
+    {"lr": 0.0001, "optimizer": "adam", "batch_size": 32, "fine_tune": True},
+    {"lr": 0.001,  "optimizer": "sgd",  "batch_size": 32, "fine_tune": True},
+    {"lr": 0.001,  "optimizer": "adam", "batch_size": 64, "fine_tune": True},
+    {"lr": 0.01,   "optimizer": "sgd",  "batch_size": 64, "fine_tune": True},
+
 ]
 
 if __name__ == "__main__":
@@ -22,7 +29,8 @@ if __name__ == "__main__":
         model, train_losses, val_losses, train_accs, val_accs = train_model(
             lr=config["lr"],
             optimizer_name=config["optimizer"],
-            batch_size=config["batch_size"]
+            batch_size=config["batch_size"],
+            fine_tune=config["fine_tune"]
         )
 
         torch.save(model.state_dict(), f"results/transfer_model_run_{run+1}.pth")
