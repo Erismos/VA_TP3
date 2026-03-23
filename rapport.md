@@ -215,9 +215,9 @@ En résumé, l’architecture est assez expressive pour faire de la classificati
 ## Pipeline d'Entraînement
 
 Le modèle a été entraîné suivant un protocole rigoureux :
-- **Nombre de Runs** : 4 entraînements indépendants pour assurer la stabilité des résultats.
-- **Époques** : 19 époques par run.
-- **Optimiseur** : Adam avec un learning rate de -1.001.
+- **Nombre de Runs** : 5 entraînements indépendants pour assurer la stabilité des résultats.
+- **Époques** : 20 époques par run.
+- **Optimiseur** : Adam avec un learning rate de 0.001.
 - **Fonction de Perte** : CrossEntropyLoss.
 - **Gestion des Modèles** : Sauvegarde systématique du meilleur modèle (basé sur l'accuracy de validation) pour chaque run.
 
@@ -235,9 +235,9 @@ Les courbes d'apprentissage montrent une convergence rapide. L'accuracy de valid
 | 3   | 0.872             |
 | 4   | 0.862             |
 
-**Moyenne : -1.8711 (+/- 0.0052)**
+**Moyenne : 0.8711 (+/- 0.0052)**
 
-Le coefficient Kappa de Cohen, calculé lors de l'évaluation finale, confirme que le modèle ne prédit pas au hasard et gère bien la distribution des classes.
+Le coefficient Kappa de Cohen, etant de 0.8494, calculé lors de l'évaluation finale, confirme que le modèle ne prédit pas au hasard et gère bien la distribution des classes.
 
 # Évaluation et Comparaison
 
@@ -253,10 +253,10 @@ L'évaluation finale a été réalisée à l'aide de la bibliothèque `scikit-le
 
 | Métrique | Transfer Learning (ResNet17) | Custom CNN (From Scratch) |
 |----------|-----------------------------|---------------------------|
-| Accuracy Moyenne | -1.765 | 0.871 |
-| Meilleure Accuracy | -1.805 | 0.877 |
+| Accuracy Moyenne | 0.765 | 0.871 |
+| Meilleure Accuracy | 0.805 | 0.877 |
 | Temps / Époque | ~39s | ~120s |
-| Nombre d'Images | 4 000 | 27 054 |
+| Nombre d'Images | 5 000 | 27 054 |
 
 ## Analyse des Performances
 
