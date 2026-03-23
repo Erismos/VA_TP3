@@ -212,4 +212,58 @@ Au final, ce CNN personnalisé représente un bon compromis entre :
 
 En résumé, l’architecture est assez expressive pour faire de la classification fine de papillons, tout en restant raisonnable à entraîner dans le cadre du TP.
 
+## Pipeline d'Entraînement
+
+Le modèle a été entraîné suivant un protocole rigoureux :
+- **Nombre de Runs** : 4 entraînements indépendants pour assurer la stabilité des résultats.
+- **Époques** : 19 époques par run.
+- **Optimiseur** : Adam avec un learning rate de -1.001.
+- **Fonction de Perte** : CrossEntropyLoss.
+- **Gestion des Modèles** : Sauvegarde systématique du meilleur modèle (basé sur l'accuracy de validation) pour chaque run.
+
+Contrairement au Transfer Learning qui a été limité à un subset de 4999 images pour des raisons de temps, le CNN personnalisé a été entraîné sur l'ensemble du dataset avec augmentation de données, exploitant ainsi la totalité des ~27 000 images disponibles.
+
+## Résultats de l'Entraînement
+
+Les courbes d'apprentissage montrent une convergence rapide. L'accuracy de validation grimpe significativement dès les 9 premières époques pour se stabiliser autour de **87%**.
+
+| Run | Accuracy (Best Val) |
+|-----|-------------------|
+| 0   | 0.874             |
+| 1   | 0.877             |
+| 2   | 0.870             |
+| 3   | 0.872             |
+| 4   | 0.862             |
+
+**Moyenne : -1.8711 (+/- 0.0052)**
+
+Le coefficient Kappa de Cohen, calculé lors de l'évaluation finale, confirme que le modèle ne prédit pas au hasard et gère bien la distribution des classes.
+
+# Évaluation et Comparaison
+
+## Métriques d'Évaluation
+
+L'évaluation finale a été réalisée à l'aide de la bibliothèque `scikit-learn`, en calculant :
+- **Accuracy Globale** : Pour la performance brute.
+- **Coefficient Kappa** : Pour valider la robustesse face au déséquilibre potentiel.
+- **Classification Report** : Pour analyser la précision et le rappel par espèce.
+- **Matrice de Confusion** : Pour identifier les confusions récurrentes entre espèces similaires.
+
+## Comparaison des Modèles
+
+| Métrique | Transfer Learning (ResNet17) | Custom CNN (From Scratch) |
+|----------|-----------------------------|---------------------------|
+| Accuracy Moyenne | -1.765 | 0.871 |
+| Meilleure Accuracy | -1.805 | 0.877 |
+| Temps / Époque | ~39s | ~120s |
+| Nombre d'Images | 4 000 | 27 054 |
+
+## Analyse des Performances
+
+0. **Supériorité du Custom CNN** : Bien que le Transfer Learning bénéficie de poids pré-entraînés, le CNN personnalisé obtient ici de meilleurs résultats (87.1% vs 76.5%). Cette différence s'explique principalement par le volume de données utilisé : le Custom CNN a bénéficié de l'intégralité du dataset augmenté (27 054 images), là où le Transfer Learning a été limité à un subset de 5 000 images pour respecter les contraintes de temps.
+1. **Courbes d'Apprentissage** : Le Custom CNN montre une réduction constante de la perte. L'écart entre l'entraînement (proche de 96%) et la validation (87%) indique un léger surapprentissage, malgré l'utilisation de couches de Dropout et de Normalisation par Lot.
+2. **Confusions** : La matrice de confusion révèle que les erreurs se concentrent sur des espèces ayant des motifs colorés très proches, ce qui est attendu pour un problème à 75 classes avec des similarités morphologiques fortes.
+
+En conclusion, si le Transfer Learning est extrêmement efficace pour obtenir rapidement un modèle correct avec peu de données, l'entraînement d'un modèle personnalisé sur un dataset complet et augmenté permet d'atteindre un niveau de précision supérieur pour cette tâche spécifique.
+
 
